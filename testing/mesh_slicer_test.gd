@@ -1,20 +1,57 @@
 extends Node3D
 
-
-
 @export var meshinstance : MeshInstance3D
 @export var plane : Plane
 @export var cap_uv = Vector2.ZERO
 @export var cap_material : Material
 
-const INTERSECTMARKER = preload("res://intersectmarker.tscn")
+const INTERSECTMARKER = preload("res://testing/intersectmarker.tscn")
 
 var markers = []
 
 
+func _ready() -> void:
+	#test_transform()
+	print(Time.get_ticks_msec())
+	slice(meshinstance)
+	print(Time.get_ticks_msec())
+	pass
 
-func slice(mesh_instance : MeshInstance3D, lower_parent : Node3D,
-		   upper_parent: Node3D, plane : Plane = self.plane, caps = true):
+
+func test_transform():
+	
+	# populate mdt from mesh or primitive -> arraymesh
+	
+	var mdt = _create_mdt(meshinstance.mesh)
+	
+	# test transformation
+	
+	for i in range(mdt.get_vertex_count()):
+		var vertex = mdt.get_vertex(i)
+		vertex += mdt.get_vertex_normal(i) * 2
+		mdt.set_vertex(i, vertex)
+	
+	# build surface array for new arraymesh
+	
+	var surface_builder = SurfaceArrayBuilder.new()
+	for i in range(mdt.get_face_count()): surface_builder.add_tri_from_mdt(mdt, i)
+	
+	# push mesh
+	
+	var arraymesh = ArrayMesh.new()
+	arraymesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_builder.build())
+	
+	#mdt.commit_to_surface(new_mesh)
+	
+	_create_mesh_instance(arraymesh, meshinstance)
+
+
+
+func slice(mesh_instance : MeshInstance3D, plane : Plane = self.plane, hull = true):
+	
+	#if hull:
+		#var inverse_hull = _create_mesh_instance(mesh_instance.mesh.create_outline(-0.1), mesh_instance)
+		#slice(inverse_hull, plane, false)
 	
 	# mdt
 	
@@ -44,6 +81,14 @@ func slice(mesh_instance : MeshInstance3D, lower_parent : Node3D,
 	# iterate through tris
 	
 	for i in range(mdt.get_face_count()):
+		
+		
+		
+		
+		#await get_tree().create_timer(5.0).timeout
+		
+		
+		
 		
 		var tri_intersect = _tri_plane_intersection(mdt, i, plane)
 		#print("tri intersect: ", tri_intersect)
@@ -187,56 +232,73 @@ func slice(mesh_instance : MeshInstance3D, lower_parent : Node3D,
 				lower_surface_builder.add_vert_manual(vab, vab_uv, vab_norm)
 				lower_surface_builder.add_vert_manual(vac, vac_uv, vac_norm)
 				lower_surface_builder.add_vert_from_mdt(mdt, c)
-	
+				
+			
+			
+		# TESTSETES
+		
+		
+		
+		#var arraymesh_upper = ArrayMesh.new()
+		#var arraymesh_lower = ArrayMesh.new()
+		#
+		#arraymesh_upper.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, upper_surface_builder.build())
+		#arraymesh_lower.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, lower_surface_builder.build())
+		#
+		#print("upper tris: ", upper_surface_builder.verts.size())
+		#
+		## create mesh instances
+		#
+		#var upper_meshinstance = _create_mesh_instance(arraymesh_upper, mesh_instance)
+		#var lower_meshinstance = _create_mesh_instance(arraymesh_lower, mesh_instance)
+		
+		
+		
+		#ADFJIDSAFISDAIJFOAD
 	
 	# create caps
 	
+	# get intersection com / average
 	
-	if caps:
-		
-		# get intersection com / average
-		
-		var intersection_com = intersection_sum / num_intersections
-		
-		# iterate through intersection pairs and create triangles
-		# use plane normal and cap_uv
-		
-		for pair in intersections.values():
-			var vab = pair[0]
-			var vac = pair[1]
-			
-			# create upper triangles
-			
-			# create first vert
-			
-			upper_cap_builder.add_vert_manual(intersection_com, cap_uv, plane.normal)
-			
-			# if new face normal is opposite desired normal, flip it (vac then vab)
-			# hacky - there is probably an analytical solution 
-			
-			var cross = (vab - intersection_com).cross(vac  - intersection_com)
-			if cross.dot(-plane.normal) >= 0:
-				upper_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
-				upper_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
-			else:
-				upper_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
-				upper_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
-			
-			
-			# create lower triangles
-			
-			lower_cap_builder.add_vert_manual(intersection_com, cap_uv, plane.normal)
-			
-			if cross.dot(plane.normal) >= 0:
-				lower_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
-				lower_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
-			else:
-				lower_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
-				lower_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
+	var intersection_com = intersection_sum / num_intersections
 	
+	# iterate through intersection pairs and create triangles
+	# use plane normal and cap_uv
+	
+	for pair in intersections.values():
+		var vab = pair[0]
+		var vac = pair[1]
+		
+		# create upper triangles
+		
+		# create first vert
+		
+		upper_cap_builder.add_vert_manual(intersection_com, cap_uv, plane.normal)
+		
+		# if new face normal is opposite desired normal, flip it (vac then vab)
+		# hacky - there is probably an analytical solution 
+		
+		var cross = (vab - intersection_com).cross(vac  - intersection_com)
+		if cross.dot(-plane.normal) >= 0:
+			upper_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
+			upper_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
+		else:
+			upper_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
+			upper_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
+		
+		
+		# create lower triangles
+		
+		lower_cap_builder.add_vert_manual(intersection_com, cap_uv, plane.normal)
+		
+		if cross.dot(plane.normal) >= 0:
+			lower_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
+			lower_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
+		else:
+			lower_cap_builder.add_vert_manual(vab, cap_uv, plane.normal)
+			lower_cap_builder.add_vert_manual(vac, cap_uv, plane.normal)
 	
 	# create meshes
-	
 	
 	# create arraymeshes from builders
 	
@@ -248,40 +310,34 @@ func slice(mesh_instance : MeshInstance3D, lower_parent : Node3D,
 	
 	# create mesh instances
 	
-	var upper_meshinstance = _create_mesh_instance(arraymesh_upper, upper_parent, mesh_instance)
-	var lower_meshinstance = _create_mesh_instance(arraymesh_lower, lower_parent, mesh_instance)
+	var upper_meshinstance = _create_mesh_instance(arraymesh_upper, mesh_instance)
+	var lower_meshinstance = _create_mesh_instance(arraymesh_lower, mesh_instance)
 	
+	# create caps
 	
-	# create cap meshes
+	# create cap arraymeshes
 	
+	var cap_arraymesh_upper = ArrayMesh.new()
+	var cap_arraymesh_lower = ArrayMesh.new()
 	
-	if caps:
-		
-		# create cap arraymeshes
-		
-		var cap_arraymesh_upper = ArrayMesh.new()
-		var cap_arraymesh_lower = ArrayMesh.new()
-		
-		cap_arraymesh_upper.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, upper_cap_builder.build())
-		cap_arraymesh_lower.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, lower_cap_builder.build())
-		
-		var cap_upper_meshinstance = _create_mesh_instance(cap_arraymesh_upper, upper_parent, mesh_instance)
-		var cap_lower_meshinstance = _create_mesh_instance(cap_arraymesh_lower, lower_parent, mesh_instance)
-		
-		# set cap material
-		
-		cap_upper_meshinstance.set_surface_override_material(0, cap_material)
-		cap_lower_meshinstance.set_surface_override_material(0, cap_material)
+	cap_arraymesh_upper.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, upper_cap_builder.build())
+	cap_arraymesh_lower.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, lower_cap_builder.build())
 	
+	var cap_upper_meshinstance = _create_mesh_instance(cap_arraymesh_upper, mesh_instance)
+	var cap_lower_meshinstance = _create_mesh_instance(cap_arraymesh_lower, mesh_instance)
 	
-	# return intersections for outside cap behavior
+	# set cap material
 	
-	return intersections
-
+	cap_upper_meshinstance.set_surface_override_material(0, cap_material)
+	cap_lower_meshinstance.set_surface_override_material(0, cap_material)
+	
+	# testing for visibility
+	
+	lower_meshinstance.position += Vector3(-4,0,0)
+	cap_lower_meshinstance.position += Vector3(-4, 0, 0)
 
 
 # -- PLANE MATH / HELPERS 
-
 
 
 # returns positive, negative or zero
@@ -355,11 +411,11 @@ func _create_mdt(mesh : Mesh) -> MeshDataTool:
 	return mdt
 
 
-func _create_mesh_instance(mesh : Mesh, new_parent : Node3D, old_instance : MeshInstance3D):
+func _create_mesh_instance(mesh : Mesh, old_instance : MeshInstance3D):
 	
 	var meshinstance_new = MeshInstance3D.new()
 	meshinstance_new.mesh = mesh
-	new_parent.add_child(meshinstance_new)
+	add_child(meshinstance_new)
 	
 	meshinstance_new.set_surface_override_material(0, old_instance.get_surface_override_material(0))
 	meshinstance_new.global_transform = old_instance.global_transform
@@ -387,7 +443,6 @@ func _visualize_marker(pos, text = "", color = Color.RED):
 	mat.albedo_color = color
 	marker.set_surface_override_material(0, mat)
 	markers.append(marker)
-
 
 func _clear_markers():
 	for m in markers: 
