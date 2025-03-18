@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://3asuuip1uict"]
+
+[ext_resource type="Script" path="res://intersectmarker.gd" id="1_tv5ea"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xi7gw"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_y3wjf"]
+material = SubResource("StandardMaterial3D_xi7gw")
+radius = 0.2
+height = 0.4
+
+[node name="v0marker" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+mesh = SubResource("SphereMesh_y3wjf")
+skeleton = NodePath("../v1marker")
+script = ExtResource("1_tv5ea")

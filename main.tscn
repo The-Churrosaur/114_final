@@ -1,0 +1,73 @@
+[gd_scene load_steps=14 format=3 uid="uid://c0f1dge4iibir"]
+
+[ext_resource type="ArrayMesh" uid="uid://bukpepiry4jh7" path="res://cruiser.obj" id="1_4bwi5"]
+[ext_resource type="Script" path="res://mesh_slicer.gd" id="1_pvv53"]
+[ext_resource type="Texture2D" uid="uid://dyanwswpdi0no" path="res://shiptex.png" id="2_0pcmm"]
+[ext_resource type="PackedScene" uid="uid://3asuuip1uict" path="res://v_marker.tscn" id="2_kl8l5"]
+[ext_resource type="PackedScene" uid="uid://hjsbo6kedm1w" path="res://intersectmarker.tscn" id="3_3r5fa"]
+[ext_resource type="Script" path="res://camera_mover.gd" id="6_0kl04"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r7ugb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xi7gw"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_y3wjf"]
+material = SubResource("StandardMaterial3D_xi7gw")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dcpnf"]
+albedo_texture = ExtResource("2_0pcmm")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i2rc1"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_hst08"]
+material = SubResource("StandardMaterial3D_i2rc1")
+size = Vector3(10, 10, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f48x0"]
+albedo_color = Color(1, 1, 1, 0.556863)
+albedo_texture = ExtResource("2_0pcmm")
+
+[node name="Node3D" type="Node3D" node_paths=PackedStringArray("meshinstance")]
+script = ExtResource("1_pvv53")
+meshinstance = NodePath("Cruiser")
+plane = Plane(1, 1, 1, 2)
+cap_material = SubResource("StandardMaterial3D_r7ugb")
+
+[node name="v0marker" parent="." instance=ExtResource("2_kl8l5")]
+unique_name_in_owner = true
+visible = false
+
+[node name="v1marker" type="MeshInstance3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+visible = false
+mesh = SubResource("SphereMesh_y3wjf")
+skeleton = NodePath("../MeshInstance3D")
+
+[node name="intersectmarker" parent="." instance=ExtResource("3_3r5fa")]
+unique_name_in_owner = true
+visible = false
+
+[node name="Cruiser" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.86437, 0, -0.879766)
+visible = false
+mesh = ExtResource("1_4bwi5")
+surface_material_override/0 = SubResource("StandardMaterial3D_dcpnf")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.557, 11.0325, 18.8901)
+script = ExtResource("6_0kl04")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+visible = false
+mesh = SubResource("BoxMesh_hst08")
+surface_material_override/0 = SubResource("StandardMaterial3D_f48x0")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+visible = false
+mesh = SubResource("BoxMesh_hst08")

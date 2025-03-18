@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://hjsbo6kedm1w"]
+
+[ext_resource type="Script" path="res://intersectmarker.gd" id="1_0lrou"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_7626e"]
+
+[node name="intersectmarker" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+mesh = SubResource("SphereMesh_7626e")
+skeleton = NodePath("../MeshInstance3D")
+script = ExtResource("1_0lrou")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.972535, 0)
+text = "adsfads"
+font_size = 100
